@@ -1,5 +1,6 @@
-import { EmailAdapter } from "../../adapters/emailAdapter";
-import { FeedbackRepository } from "../feedbackRepositories";
+import { type } from "os";
+import { EmailAdapter } from "../adapters/emailAdapter";
+import { FeedbackRepository } from "../repositories/feedbackRepositories";
 
 interface SubmitFeedbackUseCaseRequest {
     type: string,
@@ -21,6 +22,19 @@ export class SubmitFeedbackUseCase {
     }
 
     async execute(request: SubmitFeedbackUseCaseRequest) {
+
+        if(!request.type){
+            throw new Error('Type is require.')
+        }
+
+        if(!request.comment){
+            throw new Error('Comment is require.')
+        }
+
+        if(request.screenshot && !request.screenshot.startsWith('data:image/png;base64')){
+            throw new Error('Invalid screenshot format.')
+        }
+
         await this.FeedbackRepository.create(request);
 
         await this.EmailAdapter.SendMail({
